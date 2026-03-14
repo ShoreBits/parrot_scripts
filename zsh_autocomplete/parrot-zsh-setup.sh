@@ -27,11 +27,16 @@ autoload -Uz compinit colors
 compinit
 colors
 
+bindkey -e
+
 setopt AUTO_CD
 setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
+setopt EXTENDED_HISTORY
 
+HISTFILE=$HOME/.zsh_history
 HISTSIZE=5000
 SAVEHIST=5000
 
@@ -40,6 +45,9 @@ zstyle ':completion:*' list-colors ''
 
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+ZSH_AUTOSUGGEST_STRATEGY=(history)
+ZSH_AUTOSUGGEST_USE_ASYNC=true
 
 autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
@@ -53,7 +61,10 @@ build_prompt() {
     [[ $EUID -eq 0 ]] && symbol='#'
     PROMPT=$'%F{81}┌─[%f%F{47}%n@%m%f%F{81}]─[%f%F{39}%~%f%F{81}]%f\n%F{81}└──╼ %f'"$symbol "
 }
-precmd_functions=(build_prompt)
+
+precmd() {
+    build_prompt
+}
 ZSHRC_EOF
 
 if [ "${SHELL:-}" != "/bin/zsh" ]; then
