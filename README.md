@@ -1,79 +1,31 @@
 # Parrot Scripts
 
-Helper scripts for setting up and customising a Parrot OS laptop.
-## `zsh_autocomplete/install-zsh-autocomplete.sh`
+Helper scripts for setting up and customising Parrot OS.
 
-Adds ZSH, autocomplete/autosuggestions, and improved command history behaviour.
+## Script groups
 
-This script installs and configures `zsh` with:
+### [`zsh/`](zsh/)
 
-- `zsh-autosuggestions`
-- `zsh-syntax-highlighting`
-- history-based autosuggestions
-- menu-style tab completion
-- a custom two-line prompt
+Zsh setup and shell helper tools for Parrot OS, including:
 
-The script also:
+- Zsh autosuggestions and syntax highlighting
+- improved history search and completion
+- command help tools and completion helpers
 
-- backs up any existing `~/.zshrc`
-- writes a new `~/.zshrc`
-- attempts to set `zsh` as the default shell
+See the detailed guide here:
 
-### Requirements
+- [`zsh/README.md`](zsh/README.md)
 
-- Parrot OS or another Debian-based Linux distribution
-- `apt`
-- a user account with `sudo` access
+## Getting started
 
-### Installation
-
-Clone the repository and run the script:
+Clone the repository:
 
 ```bash
 git clone https://github.com/ShoreBits/parrot_scripts.git
-cd parrot_scripts/zsh_autocomplete
-chmod +x install-zsh-autocomplete.sh
-./install-zsh-autocomplete.sh
-exec zsh
+cd parrot_scripts
+cd zsh
 ```
 
-### Restore
+## Notes
 
-If you want to restore your previous shell configuration:
-
-```bash
-cp ~/.zshrc.bak.YYYYMMDD-HHMMSS ~/.zshrc
-exec zsh
-```
-
-### Keyboard shortcuts
-
-This setup enables a few useful shell shortcuts:
-
-- **Up Arrow / Down Arrow**  
-    Search backward and forward through command history using the text already typed on the line.
-    
-- **Right Arrow**  
-    Accept the inline autosuggestion shown from command history.
-    
-- **Tab**  
-    Open the completion menu and select available command or path completions.
-    
-
-### Example
-
-If you previously ran:
-```bash
-git status
-git pull
-git push
-```
-and then type:
-```bash
-git
-```
-you can:
-
-- press **Up** or **Down** to cycle through matching history
-- press **Right Arrow** to accept the inline suggestion
-- press **Tab** to open completion options
+This repository is intended to grow over time with additional Parrot OS setup and helper scripts.
