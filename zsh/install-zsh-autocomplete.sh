@@ -21,8 +21,35 @@ if [ -f "$ZSHRC" ]; then
   cp "$ZSHRC" "$BACKUP"
 fi
 
-info "Writing new ~/.zshrc"
-cat > "$ZSHRC" <<'ZSHRC_EOF'
+choose_theme() {
+  local choice
+  echo
+  echo "Choose a zsh prompt theme:"
+  echo "  1) Cyan   (default)"
+  echo "  2) Red"
+  echo "  3) Green"
+  echo "  4) Yellow"
+  echo "  5) Blue"
+  echo "  6) Magenta"
+  echo
+  read -r -p "Enter choice [1-6] (default 1): " choice
+
+  case "${choice:-1}" in
+    1) THEME_NAME="Cyan";    BRACKET_COLOR="cyan";    USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+    2) THEME_NAME="Red";     BRACKET_COLOR="red";     USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+    3) THEME_NAME="Green";   BRACKET_COLOR="green";   USERHOST_COLOR="cyan";    PATH_COLOR="yellow" ;;
+    4) THEME_NAME="Yellow";  BRACKET_COLOR="yellow";  USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+    5) THEME_NAME="Blue";    BRACKET_COLOR="blue";    USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+    6) THEME_NAME="Magenta"; BRACKET_COLOR="magenta"; USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+    *) warn "Invalid choice, defaulting to Cyan"
+       THEME_NAME="Cyan";    BRACKET_COLOR="cyan";    USERHOST_COLOR="cyan";    PATH_COLOR="green" ;;
+  esac
+}
+
+choose_theme
+
+info "Writing new ~/.zshrc with theme: $THEME_NAME"
+cat > "$ZSHRC" <<ZSHRC_EOF
 autoload -Uz compinit colors
 compinit
 colors
@@ -36,7 +63,7 @@ setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 setopt EXTENDED_HISTORY
 
-HISTFILE=$HOME/.zsh_history
+HISTFILE=\$HOME/.zsh_history
 HISTSIZE=5000
 SAVEHIST=5000
 
@@ -53,13 +80,21 @@ autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-bindkey "$terminfo[kcuu1]" up-line-or-beginning-search
-bindkey "$terminfo[kcud1]" down-line-or-beginning-search
+bindkey "\$terminfo[kcuu1]" up-line-or-beginning-search
+bindkey "\$terminfo[kcud1]" down-line-or-beginning-search
+
+# Prompt theme selected during install
+PARROT_PROMPT_THEME="${THEME_NAME}"
+PARROT_PROMPT_BRACKET_COLOR="${BRACKET_COLOR}"
+PARROT_PROMPT_USERHOST_COLOR="${USERHOST_COLOR}"
+PARROT_PROMPT_PATH_COLOR="${PATH_COLOR}"
 
 build_prompt() {
-    local symbol='$'
-    [[ $EUID -eq 0 ]] && symbol='#'
-    PROMPT=$'%F{81}┌─[%f%F{47}%n@%m%f%F{81}]─[%f%F{39}%~%f%F{81}]%f\n%F{81}└──╼ %f'"$symbol "
+    local symbol='\$'
+    [[ \$EUID -eq 0 ]] && symbol='#'
+
+    PROMPT="%F{\${PARROT_PROMPT_BRACKET_COLOR}}┌─[%f%F{\${PARROT_PROMPT_USERHOST_COLOR}}%n@%m%f%F{\${PARROT_PROMPT_BRACKET_COLOR}}]─[%f%F{\${PARROT_PROMPT_PATH_COLOR}}%~%f%F{\${PARROT_PROMPT_BRACKET_COLOR}}]%f
+%F{\${PARROT_PROMPT_BRACKET_COLOR}}└──╼ %f\$symbol "
 }
 
 precmd() {
@@ -73,5 +108,6 @@ if [ "${SHELL:-}" != "/bin/zsh" ]; then
 fi
 
 info "Done"
+echo "Installed theme: $THEME_NAME"
 echo "Start a new shell with: exec zsh"
 echo "Or log out and back in to use zsh as your default shell."
