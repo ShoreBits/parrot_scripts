@@ -21,7 +21,6 @@ if [ -z "${CURRENT_HOME:-}" ]; then
 fi
 
 ZSHRC="$CURRENT_HOME/.zshrc"
-BACKUP="$CURRENT_HOME/.zshrc.bak.$(date +%Y%m%d-%H%M%S)"
 
 ensure_zsh_in_shells() {
   if ! grep -qx "$ZSH_BIN" /etc/shells 2>/dev/null; then
@@ -74,19 +73,10 @@ choose_install_mode() {
   esac
 }
 
-write_zshrc() {
-  local target_zshrc="$1"
-  local target_user="$2"
+write_zshrc_content() {
+  local target_file="$1"
 
-  if [ -f "$target_zshrc" ]; then
-    local backup_file="${target_zshrc}.bak.$(date +%Y%m%d-%H%M%S)"
-    info "Backing up existing $target_zshrc to $backup_file"
-    sudo cp "$target_zshrc" "$backup_file"
-    sudo chown "$target_user":"$target_user" "$backup_file" 2>/dev/null || true
-  fi
-
-  info "Writing new $target_zshrc with theme: $THEME_NAME"
-  sudo tee "$target_zshrc" >/dev/null <<ZSHRC_EOF
+  sudo tee "$target_file" >/dev/null <<ZSHRC_EOF
 autoload -Uz compinit colors
 compinit
 colors
@@ -138,7 +128,21 @@ precmd() {
     build_prompt
 }
 ZSHRC_EOF
+}
 
+write_zshrc() {
+  local target_zshrc="$1"
+  local target_user="$2"
+
+  if [ -f "$target_zshrc" ]; then
+    local backup_file="${target_zshrc}.bak.$(date +%Y%m%d-%H%M%S)"
+    info "Backing up existing $target_zshrc to $backup_file"
+    sudo cp "$target_zshrc" "$backup_file"
+    sudo chown "$target_user":"$target_user" "$backup_file" 2>/dev/null || true
+  fi
+
+  info "Writing new $target_zshrc with theme: $THEME_NAME"
+  write_zshrc_content "$target_zshrc"
   sudo chown "$target_user":"$target_user" "$target_zshrc" 2>/dev/null || true
 }
 
@@ -166,8 +170,15 @@ set_adduser_default_shell() {
 }
 
 copy_to_skel() {
-  info "Copying default .zshrc to /etc/skel for future users"
-  sudo cp "$ZSHRC" /etc/skel/.zshrc
+  local skel_file="/etc/skel/.zshrc"
+  info "Writing default .zshrc to $skel_file for future users"
+
+  if [ -f "$skel_file" ]; then
+    sudo cp "$skel_file" "${skel_file}.bak.$(date +%Y%m%d-%H%M%S)"
+  fi
+
+  write_zshrc_content "$skel_file"
+  sudo chmod 644 "$skel_file"
 }
 
 set_shell_for_existing_normal_users() {
