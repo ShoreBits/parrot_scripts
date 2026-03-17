@@ -153,6 +153,18 @@ set_system_default_shell() {
   sudo useradd -D -s "$ZSH_BIN"
 }
 
+set_adduser_default_shell() {
+  info "Setting adduser default shell to $ZSH_BIN in /etc/adduser.conf"
+
+  if grep -q '^DSHELL=' /etc/adduser.conf; then
+    sudo sed -i "s|^DSHELL=.*|DSHELL=$ZSH_BIN|" /etc/adduser.conf
+  elif grep -q '^#DSHELL=' /etc/adduser.conf; then
+    sudo sed -i "s|^#DSHELL=.*|DSHELL=$ZSH_BIN|" /etc/adduser.conf
+  else
+    echo "DSHELL=$ZSH_BIN" | sudo tee -a /etc/adduser.conf >/dev/null
+  fi
+}
+
 copy_to_skel() {
   info "Copying default .zshrc to /etc/skel for future users"
   sudo cp "$ZSHRC" /etc/skel/.zshrc
@@ -181,11 +193,13 @@ case "$INSTALL_MODE" in
     ;;
   system_default)
     set_system_default_shell
+    set_adduser_default_shell
     copy_to_skel
     set_shell_for_user "$CURRENT_USER"
     ;;
   system_all)
     set_system_default_shell
+    set_adduser_default_shell
     copy_to_skel
     set_shell_for_existing_normal_users
     ;;
